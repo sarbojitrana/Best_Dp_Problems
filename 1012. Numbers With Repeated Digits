@@ -1,0 +1,58 @@
+// Problem link : https://leetcode.com/problems/partition-array-into-two-arrays-to-minimize-sum-difference/description/
+// Submission link : https://leetcode.com/problems/numbers-with-repeated-digits/submissions/1610510494/
+
+class Solution {
+public:
+    int minimumDifference(vector<int>& nums) {
+        int n = nums.size() / 2;
+        vector<int> a(nums.begin(), nums.begin() + n);
+        vector<int> b(nums.begin() + n, nums.end());
+
+        vector<vector<int>> subs(n + 1);
+    
+        for (int i = 0; i < (1 << n); i++) {
+            int sum = 0, cnt = 0;
+            for (int j = 0; j < n; j++) {
+                if ((i >> j) & 1) {
+                    sum += a[j];
+                    cnt++;
+                }
+            }
+            subs[cnt].push_back(sum);
+        }
+        for (int i = 0; i <= n; i++) {
+            sort(subs[i].begin(), subs[i].end());
+        }
+
+        int totalSum = accumulate(nums.begin(), nums.end(), 0);
+        int ans = INT_MAX;
+
+        for (int i = 0; i < (1 << n); i++) {
+            int sum = 0, cnt = 0;
+            for (int j = 0; j < n; j++) {
+                if ((i >> j) & 1) {
+                    sum += b[j];
+                    cnt++;
+                }
+            }
+
+            int rem = n - cnt;
+            auto& vec = subs[rem];
+            int target = totalSum / 2 - sum;
+
+            auto it = lower_bound(vec.begin(), vec.end(), target);
+            if (it != vec.end()) {
+                int total = sum + *it;
+                ans = min(ans, abs(totalSum - 2 * total));
+            }
+            if (it != vec.begin()) {
+                --it;
+                int total = sum + *it;
+                ans = min(ans, abs(totalSum - 2 * total));
+            }
+        }
+
+        return ans;
+    }
+
+};
